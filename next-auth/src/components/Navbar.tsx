@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { User } from "next-auth";
 import { Button } from "./ui/button";
 import { LogOut, User as UserIcon } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -26,7 +27,18 @@ export default function Navbar() {
             {session ? (
               <>
                 <div className="flex items-center gap-2 text-gray-300">
-                  <UserIcon className="h-5 w-5" />
+                  <Avatar className="h-7 w-7">
+                    <AvatarImage
+                      src={user?.image || undefined}
+                      alt={user?.username || user?.email || "User"}
+                    />
+                    <AvatarFallback>
+                      {user?.username?.[0]?.toUpperCase() ||
+                        user?.email?.[0]?.toUpperCase() || (
+                          <UserIcon className="h-5 w-5" />
+                        )}
+                    </AvatarFallback>
+                  </Avatar>
                   <span className="text-sm md:text-base">
                     {user?.username || user?.email}
                   </span>

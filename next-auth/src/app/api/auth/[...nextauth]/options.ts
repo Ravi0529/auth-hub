@@ -2,6 +2,8 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import GoogleProvider from "next-auth/providers/google";
+import { randomBytes } from "crypto";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -45,13 +47,66 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        if (!user.email) {
+          throw new Error(
+            "No email associated with this Google account. Please make your email public or use another sign-in method."
+          );
+        }
+        const existingUser = await prisma.user.findUnique({
+          where: {
+            email: user.email,
+          },
+        });
+        if (!existingUser) {
+          let username = user.name
+            ? user.name.replace(/\s+/g, "").toLowerCase()
+            : user.email?.split("@")[0] || "user";
+          let uniqueUsername = username;
+          let count = 1;
+          while (
+            await prisma.user.findUnique({
+              where: { username: uniqueUsername },
+            })
+          ) {
+            uniqueUsername = `${username}${count}`;
+            count++;
+          }
+          const randomPassword = randomBytes(16).toString("hex");
+          await prisma.user.create({
+            data: {
+              username: uniqueUsername,
+              email: user.email,
+              password: randomPassword,
+            },
+          });
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.username = user.username;
         token.email = user.email;
+      }
+      if (!token.username && token.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: {
+            email: token.email as string,
+          },
+        });
+        if (dbUser) {
+          token.username = dbUser.username;
+          token.id = dbUser.id;
+        }
       }
       return token;
     },

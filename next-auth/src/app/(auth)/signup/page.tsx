@@ -15,7 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, User, Mail, Lock, UserPlus } from "lucide-react";
+import { Loader2, User, Mail, Lock, UserPlus, Goal } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function SignUpPage() {
@@ -52,6 +52,14 @@ export default function SignUpPage() {
     }
   };
 
+  const handleOAuthSignIn = async (provider: "google") => {
+    setLoading(true);
+    await import("next-auth/react").then(({ signIn }) =>
+      signIn(provider, { callbackUrl: "/dashboard" })
+    );
+    setLoading(false);
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <Card className="w-full max-w-md shadow-lg">
@@ -60,6 +68,27 @@ export default function SignUpPage() {
             <UserPlus className="w-6 h-6" /> Sign Up
           </CardTitle>
         </CardHeader>
+        <CardContent className="space-y-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full flex items-center gap-2"
+            onClick={() => handleOAuthSignIn("google")}
+            disabled={loading}
+          >
+            <Goal className="w-5 h-5" /> Sign up with Google
+          </Button>
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                or continue with email
+              </span>
+            </div>
+          </div>
+        </CardContent>
         <form onSubmit={handleSubmit} autoComplete="off">
           <CardContent className="space-y-4">
             {error && (
