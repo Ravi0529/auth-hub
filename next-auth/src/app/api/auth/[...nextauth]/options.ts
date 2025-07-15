@@ -27,7 +27,7 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!user) {
-            return null;
+            throw new Error("Incorrect email or password");
           }
 
           if (
@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
           ) {
             return user;
           }
-          return null;
+          throw new Error("Incorrect email or password");
         } catch (error: unknown) {
           if (error instanceof Error) {
             throw new Error(error.message);
@@ -50,12 +50,17 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.username = user.username;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
         (session.user as { id?: string }).id = token.id as string;
+        (session.user as { username?: string }).username =
+          token.username as string;
+        (session.user as { email?: string }).email = token.email as string;
       }
       return session;
     },
