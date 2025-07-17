@@ -62,4 +62,72 @@
     - Obtain and set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` from Google Cloud Console (note: you'll need unique credentials for each project).
 
 13. **Update Options, Pages, and Navbar**
+
     - Refine your `options.ts`, `signin.tsx`, `signup.tsx`, and navbar to fully support and integrate provider-based authentication.
+
+---
+
+## 2. clerk-auth
+
+### Steps:
+
+1. **Initialize Prisma**
+
+   - Run `pnpx prisma init` and define your database schema in `schema.prisma`.
+
+2. **Apply Migrations & Generate Client**
+
+   - Run `prisma migrate dev` and `prisma generate`.
+   - Add a `src/lib/prisma.ts` file to manage your Prisma client instance.
+
+3. **(Optional) Create Error Page**
+
+   - Add an error page at `src/app/error/page.tsx` for custom error handling.
+
+4. **Set Up Clerk Middleware**
+
+   - Configure `src/middleware.ts` to handle authentication and route protection using Clerk.
+
+5. **Wrap App with ClerkProvider**
+
+   - In your main `layout.tsx`, wrap the body with `<ClerkProvider>` to provide Clerk context throughout your app.
+
+6. **Create Signup Page with Clerk Auth**
+
+   - Implement the sign-up page at `src/app/(auth)/signup/page.tsx` using Clerk authentication.
+
+7. **Add Email Verification Logic**
+
+   - Integrate email verification code logic in the signup page to verify user emails.
+
+8. **Create Signin Page with Clerk Auth**
+
+   - Implement the sign-in page at `src/app/(auth)/signin/page.tsx` using Clerk authentication.
+
+9. **Add Navbar with Clerk Auth**
+
+   - Build a navigation bar that uses `auth().userId` to display user info and add it to your `layout.tsx`.
+
+10. **Create Clerk Webhook Endpoint**
+
+    - In the Clerk dashboard, create a new webhook endpoint for the `user.created` event (use localtunnel for HTTPS if needed).
+
+11. **Configure Webhook Secret**
+
+    - Obtain the signing secret from Clerk and set it as `WEBHOOK_SECRET` in your environment variables.
+
+12. **Implement Webhook Handler**
+
+    - Create `src/app/api/webhook/register/route.ts` to handle Clerk webhooks and sync users to your database using Svix.
+
+13. **Set Up Google SSO in Clerk**
+
+    - Configure Google credentials in Clerk's SSO connections.
+
+14. **Set Authorized Redirect URI in Google Cloud**
+
+    - Add the authorized redirect URI from Clerk to your Google Cloud Console project.
+
+15. **Add Google Auth to Signin**
+
+    - Integrate Google authentication in your sign-in page using the `CustomGoogleOneTap.tsx` component.
