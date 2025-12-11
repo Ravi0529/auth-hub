@@ -32,7 +32,7 @@ export const lastNameValidation = z
   .string()
   .max(60, "Lastname must not exceed 60 characters");
 
-export const SignUpSchema = z.object({
+export const signUpSchema = z.object({
   username: usernameValidation,
   firstName: firstNameValidation,
   lastName: lastNameValidation,
