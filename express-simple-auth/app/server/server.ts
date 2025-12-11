@@ -3,6 +3,7 @@ import express from "express";
 import type { Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import authRoute from "./routes/auth.route";
+import userRoute from "./routes/user.route";
 import cors from "cors";
 
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/api/auth", authRoute);
+app.use("api/user", userRoute);
 
 app.get("/", (_: Request, res: Response) => {
   return res.status(200).json({ message: "Hello from the server!" });
