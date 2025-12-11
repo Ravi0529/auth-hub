@@ -6,6 +6,23 @@ interface DecodedTokenPayload extends JwtPayload {
   userId: string;
 }
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        username: string;
+        email: string;
+        role: string;
+        createdAt: Date;
+        updatedAt: Date;
+      };
+    }
+  }
+}
+
 export const protectedRoute = async (
   req: Request,
   res: Response,
@@ -47,9 +64,27 @@ export const protectedRoute = async (
       return res.status(404).json({ error: "User not found" });
     }
 
+    req.user = user;
+
     next();
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
+};
+
+export const restrictTo = (...allowedRoles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(403).json({ error: "Forbidden: Access denied" });
+    }
+
+    next();
+  };
 };
